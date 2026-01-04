@@ -7,6 +7,9 @@ const rateLimit = require('express-rate-limit');
 const dotenv = require('dotenv');
 const path = require('path');
 const fs = require('fs');
+const morgan = require("morgan")
+
+
 
 // Load environment variables
 dotenv.config();
@@ -26,12 +29,15 @@ const app = express();
 // Ensure upload directory exists
 const uploadDir = path.join(__dirname, '../uploads');
 if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
+    fs.mkdirSync(uploadDir, { recursive: true });
 }
 
 // Security middleware
 app.use(helmet());
 app.use(compression());
+
+// Console logs
+app.use(morgan("dev"))
 
 // CORS configuration
 const corsOptions = {
@@ -39,7 +45,7 @@ const corsOptions = {
   credentials: true,
   optionsSuccessStatus: 200
 };
-app.use(cors(corsOptions));
+app.use(cors());
 
 // Rate limiting
 const limiter = rateLimit({

@@ -4,7 +4,7 @@ const { defaultMaxListeners } = require("nodemailer/lib/xoauth2")
 const userSchema = new mongoose.Schema({
     userId: {
         type: String,
-        required: true
+        // required: true
     },
     password: {
         type: String,
@@ -31,7 +31,7 @@ const userSchema = new mongoose.Schema({
         required: true,
         default: Date.now
     },
-    roles: {
+    role: {
         type: String,
         enum: ["staff", "financial officer", "ceo", "accountant", "admin", "chairman"],
         default: "staff"

@@ -31,6 +31,7 @@ app.use('/api/', limiter);
 app.use(express.json())
 app.use(express.urlencoded({ extended: true}))
 
+app.use(errorHandler)
 
 app.use(morgan('dev'));
 
@@ -50,7 +51,6 @@ app.listen(PORT, ()=> {
 
 app.use("/api/auth", authRouter)
 app.use("/api/claim", claimRouter)
-app.use(errorHandler)
 
 
 

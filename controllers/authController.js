@@ -9,7 +9,7 @@ const signup = async (req, res, next)=>{
         const salt = await bcrypt.genSalt(10)
         const hashedPassword = await bcrypt.hash(password, salt)
 
-        const userId = "HFA" + Math.floor(Math.random() * 1000000) 
+        // const userId = "HFA" + Math.floor(Math.random() * 1000000) 
 
         const user = await userModel.create({...req.body, password: hashedPassword, userId})
 
@@ -36,13 +36,13 @@ const signup = async (req, res, next)=>{
 
 //Login
 const login = async (req, res, next) => {
-    const { email, password } = req.body;
+    const { userId, password } = req.body;
 
     try {
-        if (!email || !password) {
+        if (!userId || !password) {
             return res.status(400).json({
                 status: "error",
-                message: "Email and password are required"
+                message: "UserId and password are required"
             });
         }
 
@@ -51,11 +51,11 @@ const login = async (req, res, next) => {
         if (!user || !user.password) {
             return res.status(401).json({
                 status: "error",
-                message: "Email or password is incorrect"
+                message: "UserId or password is incorrect"
             });
         }
 
-        const passwordCorrect = await bcrypt.compare(password, user.password);
+        const passwordCorrect = await bcrypt.compare(userId, user.userId);
         if (!passwordCorrect) {
             return res.status(401).json({
                 status: "error",
@@ -71,11 +71,10 @@ const login = async (req, res, next) => {
 
         const userData = {
             _id: user._id,
-            name: user.name,
+            name: user.claimantName,
             email: user.email,
-            isVerified: user.isVerified,
             role: user.role,
-            image: user.authImage
+            userId: user.userId
         };
 
         res.status(200).json({
@@ -120,8 +119,33 @@ const updateUserPassword = async (req, res, next) => {
 };
 
 
+const getUserById = async (req, res, next) => {
+    const {id} = req.params
+
+    try {
+        const user = await userModel.findById(id)
+
+        if(!user){
+            return res.status(404).json({
+                status: 'error',
+                message: "User not found"
+            })
+        }
+
+        res.status(200).json({
+            status: "success",
+            message: "User found",
+            data: user
+        })
+    } catch (error) {
+        console.log(error)
+        next(error)
+    }
+}
+
 module.exports = {
     signup,
     login,
-    updateUserPassword
+    updateUserPassword,
+    getUserById
 }

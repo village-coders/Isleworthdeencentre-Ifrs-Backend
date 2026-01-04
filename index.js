@@ -45,7 +45,14 @@ const corsOptions = {
   credentials: true,
   optionsSuccessStatus: 200
 };
-app.use(cors());
+
+
+app.use(cors({
+    origin: "*"
+}));
+
+app.set('trust proxy', 1)
+
 
 // Rate limiting
 const limiter = rateLimit({

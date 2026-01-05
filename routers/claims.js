@@ -6,6 +6,7 @@ const { body, query, validationResult } = require('express-validator');
 const Claim = require('../models/claim');
 const User = require('../models/user');
 const auth = require('../middlewares/auth');
+const uploadReceipt = require('../utils/uploadReceipt');
 
 // Configure multer for file upload
 const fileFilter = (req, file, cb) => {

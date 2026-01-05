@@ -2,7 +2,7 @@
 const axios = require('axios');
 
 async function testLogin() {
-  const baseURL = 'http://localhost:5000/api';
+  const baseURL = 'http://localhost:500/api';
   
   console.log('Testing admin login...\n');
   

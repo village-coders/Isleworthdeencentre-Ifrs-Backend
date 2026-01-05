@@ -26,12 +26,12 @@ const migrate = async () => {
     
     if (!adminExists) {
       // Create admin user
-      const adminPassword = await bcrypt.hash('Admin@123', 10);
+    //   const adminPassword = await bcrypt.hash('Admin@123', 10);
       const admin = new User({
         employee_id: 'HFA-ADMIN-001',
         name: 'Administrator',
         email: 'admin@hfa-uk.com',
-        password: adminPassword,
+        password: "Admin@123",
         role: 'admin',
         department: 'Administration',
         phone: '07123 456789',

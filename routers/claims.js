@@ -313,16 +313,19 @@ router.put('/:id', auth.verifyToken, upload.single('image'), async (req, res) =>
   }
 });
 
-// @route   PUT /api/claims/:id/approve
-// @desc    Approve a claim
-// @access  Private (Admin/Approver only)
-router.put('/:id/approve', 
+// @route   PUT /api/claims/:id/status
+// @desc    Change claim status
+// @access  Private (Admin)
+router.put('/:id/status', 
   auth.verifyToken,
   auth.checkRole('admin', 'approver'),
   [
-    body('notes').optional().trim()
+    body('notes').optional().trim(),
+    body('status').isIn(['approved', 'rejected', 'paid', 'pending']).withMessage('Invalid status')
   ],
   async (req, res) => {
+
+    const { status, notes } = req.body;
   try {
     const claim = await Claim.findById(req.params.id);
     
@@ -332,20 +335,22 @@ router.put('/:id/approve',
         message: 'Claim not found'
       });
     }
-    
-    // Check if claim can be approved
-    if (!['new', 'pending', 'recommendation'].includes(claim.status)) {
+
+    if (claim.status === status) {
       return res.status(400).json({
         success: false,
-        message: `Claim cannot be approved in ${claim.status} status`
+        message: `Claim is already ${status}`
       });
-    }
+    }             
+
+        
+    
     
     // Update claim
-    claim.status = 'approved';
+    claim.status = status;
     claim.approved_by = req.user.userId;
     claim.approved_at = new Date();
-    if (req.body.notes) claim.notes = req.body.notes;
+    if (req.body.notes) claim.notes = notes;
     
     await claim.save();
     
@@ -356,7 +361,7 @@ router.put('/:id/approve',
     res.json({
       success: true,
       data: claim,
-      message: 'Claim approved successfully'
+      message: `Claim successfully changed to ${status}`
     });
     
   } catch (error) {
@@ -370,187 +375,128 @@ router.put('/:id/approve',
 // @route   PUT /api/claims/:id/reject
 // @desc    Reject a claim
 // @access  Private (Admin/Approver only)
-router.put('/:id/reject', 
-  auth.verifyToken,
-  auth.checkRole('admin', 'approver'),
-  [
-    body('reason').trim().notEmpty().withMessage('Rejection reason is required')
-  ],
-  async (req, res) => {
-  try {
-    // Check validation errors
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        success: false,
-        errors: errors.array()
-      });
-    }
+// router.put('/:id/reject', 
+//   auth.verifyToken,
+//   auth.checkRole('admin', 'approver'),
+//   [
+//     body('reason').trim().notEmpty().withMessage('Rejection reason is required')
+//   ],
+//   async (req, res) => {
+//   try {
+//     // Check validation errors
+//     const errors = validationResult(req);
+//     if (!errors.isEmpty()) {
+//       return res.status(400).json({
+//         success: false,
+//         errors: errors.array()
+//       });
+//     }
     
-    const claim = await Claim.findById(req.params.id);
+//     const claim = await Claim.findById(req.params.id);
     
-    if (!claim) {
-      return res.status(404).json({
-        success: false,
-        message: 'Claim not found'
-      });
-    }
+//     if (!claim) {
+//       return res.status(404).json({
+//         success: false,
+//         message: 'Claim not found'
+//       });
+//     }
     
-    // Check if claim can be rejected
-    if (!['new', 'pending', 'recommendation'].includes(claim.status)) {
-      return res.status(400).json({
-        success: false,
-        message: `Claim cannot be rejected in ${claim.status} status`
-      });
-    }
+//     // Check if claim can be rejected
+//     if (!['new', 'pending', 'recommendation'].includes(claim.status)) {
+//       return res.status(400).json({
+//         success: false,
+//         message: `Claim cannot be rejected in ${claim.status} status`
+//       });
+//     }
     
-    // Update claim
-    claim.status = 'rejected';
-    claim.rejected_by = req.user.userId;
-    claim.rejected_at = new Date();
-    claim.rejection_reason = req.body.reason;
+//     // Update claim
+//     claim.status = 'rejected';
+//     claim.rejected_by = req.user.userId;
+//     claim.rejected_at = new Date();
+//     claim.rejection_reason = req.body.reason;
     
-    await claim.save();
+//     await claim.save();
     
-    // Log activity
-    await auth.logActivity(req, 'reject', 'claim', claim._id.toString(), 
-      `Rejected claim ${claim.claim_id}: ${req.body.reason}`);
+//     // Log activity
+//     await auth.logActivity(req, 'reject', 'claim', claim._id.toString(), 
+//       `Rejected claim ${claim.claim_id}: ${req.body.reason}`);
     
-    res.json({
-      success: true,
-      data: claim,
-      message: 'Claim rejected successfully'
-    });
+//     res.json({
+//       success: true,
+//       data: claim,
+//       message: 'Claim rejected successfully'
+//     });
     
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Server error'
-    });
-  }
-});
+//   } catch (error) {
+//     res.status(500).json({
+//       success: false,
+//       message: 'Server error'
+//     });
+//   }
+// });
 
 // @route   PUT /api/claims/:id/recommend
 // @desc    Add recommendation to a claim
 // @access  Private (Admin/Approver only)
-router.put('/:id/recommend', 
-  auth.verifyToken,
-  auth.checkRole('admin', 'approver'),
-  [
-    body('recommendation').trim().notEmpty().withMessage('Recommendation is required')
-  ],
-  async (req, res) => {
-  try {
-    // Check validation errors
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        success: false,
-        errors: errors.array()
-      });
-    }
+// router.put('/:id/recommend', 
+//   auth.verifyToken,
+//   auth.checkRole('admin', 'approver'),
+//   [
+//     body('recommendation').trim().notEmpty().withMessage('Recommendation is required')
+//   ],
+//   async (req, res) => {
+//   try {
+//     // Check validation errors
+//     const errors = validationResult(req);
+//     if (!errors.isEmpty()) {
+//       return res.status(400).json({
+//         success: false,
+//         errors: errors.array()
+//       });
+//     }
     
-    const claim = await Claim.findById(req.params.id);
+//     const claim = await Claim.findById(req.params.id);
     
-    if (!claim) {
-      return res.status(404).json({
-        success: false,
-        message: 'Claim not found'
-      });
-    }
+//     if (!claim) {
+//       return res.status(404).json({
+//         success: false,
+//         message: 'Claim not found'
+//       });
+//     }
     
-    // Update claim
-    claim.status = 'recommendation';
-    claim.recommendation = req.body.recommendation;
-    claim.recommendation_by = req.user.userId;
-    claim.recommendation_at = new Date();
+//     // Update claim
+//     claim.status = 'recommendation';
+//     claim.recommendation = req.body.recommendation;
+//     claim.recommendation_by = req.user.userId;
+//     claim.recommendation_at = new Date();
     
-    await claim.save();
+//     await claim.save();
     
-    // Log activity
-    await auth.logActivity(req, 'update', 'claim', claim._id.toString(), 
-      `Added recommendation to claim ${claim.claim_id}`);
+//     // Log activity
+//     await auth.logActivity(req, 'update', 'claim', claim._id.toString(), 
+//       `Added recommendation to claim ${claim.claim_id}`);
     
-    res.json({
-      success: true,
-      data: claim,
-      message: 'Recommendation added successfully'
-    });
+//     res.json({
+//       success: true,
+//       data: claim,
+//       message: 'Recommendation added successfully'
+//     });
     
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Server error'
-    });
-  }
-});
+//   } catch (error) {
+//     res.status(500).json({
+//       success: false,
+//       message: 'Server error'
+//     });
+//   }
+// });
 
-// @route   PUT /api/claims/:id/pay
-// @desc    Mark claim as paid
-// @access  Private (Admin only)
-router.put('/:id/pay', 
-  auth.verifyToken,
-  auth.checkRole('admin'),
-  [
-    body('payment_reference').trim().notEmpty().withMessage('Payment reference is required')
-  ],
-  async (req, res) => {
-  try {
-    // Check validation errors
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        success: false,
-        errors: errors.array()
-      });
-    }
-    
-    const claim = await Claim.findById(req.params.id);
-    
-    if (!claim) {
-      return res.status(404).json({
-        success: false,
-        message: 'Claim not found'
-      });
-    }
-    
-    // Check if claim can be marked as paid
-    if (claim.status !== 'approved') {
-      return res.status(400).json({
-        success: false,
-        message: 'Only approved claims can be marked as paid'
-      });
-    }
-    
-    // Update claim
-    claim.status = 'paid';
-    claim.paid_by = req.user.userId;
-    claim.paid_at = new Date();
-    claim.payment_reference = req.body.payment_reference;
-    
-    await claim.save();
-    
-    // Log activity
-    await auth.logActivity(req, 'pay', 'claim', claim._id.toString(), 
-      `Marked claim ${claim.claim_id} as paid. Ref: ${req.body.payment_reference}`);
-    
-    res.json({
-      success: true,
-      data: claim,
-      message: 'Claim marked as paid successfully'
-    });
-    
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Server error'
-    });
-  }
-});
+
 
 // @route   DELETE /api/claims/:id
 // @desc    Delete a claim
 // @access  Private
+
+
 router.delete('/:id', auth.verifyToken, async (req, res) => {
   try {
     const claim = await Claim.findById(req.params.id);

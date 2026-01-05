@@ -52,7 +52,7 @@ const claimSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['new', 'pending', 'approved', 'rejected', 'paid', 'recommendation', 'under_review'],
+    enum: ['new', 'pending', 'approved', 'rejected', 'paid', 'under_review'],
     default: 'new'
   },
   notes: {

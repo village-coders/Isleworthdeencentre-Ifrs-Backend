@@ -170,12 +170,7 @@ router.post('/',
     // Check validation errors
 
     // Add receipt if uploaded
-    if (req.file) {
-      const receipt = await uploadReceipt(req.file, req.user.userId);
-
-      claimData.receipt_filename = receipt.filename;
-      claimData.receipt_url = receipt.publicUrl;
-    }
+    
 
     
     const errors = validationResult(req);
@@ -214,8 +209,8 @@ router.post('/',
     if (req.file) {
       const receipt = await uploadReceipt(req.file, req.user.userId);
 
-      claim.receipt_filename = receipt.filename;
-      claim.receipt_url = receipt.publicUrl;
+      claimData.receipt_filename = receipt.filename;
+      claimData.receipt_url = receipt.publicUrl;
     }
 
     
@@ -251,7 +246,7 @@ router.post('/',
 // @route   PUT /api/claims/:id
 // @desc    Update claim
 // @access  Private
-router.put('/:id', auth.verifyToken, upload.single('receipt'), async (req, res) => {
+router.put('/:id', auth.verifyToken, upload.single('image'), async (req, res) => {
   try {
     const claim = await Claim.findById(req.params.id);
     
@@ -286,9 +281,12 @@ router.put('/:id', auth.verifyToken, upload.single('receipt'), async (req, res) 
     
     // Update receipt if uploaded
     if (req.file) {
-      claim.receipt_filename = req.file.filename;
-      claim.receipt_url = `/uploads/receipts/${req.file.filename}`;
+      const receipt = await uploadReceipt(req.file, req.user.userId);
+
+      claim.receipt_filename = receipt.filename;
+      claim.receipt_url = receipt.publicUrl;
     }
+
     
     // Reset status if amount changed significantly
     if (req.body.amount && req.body.amount > 1000 && claim.status === 'new') {

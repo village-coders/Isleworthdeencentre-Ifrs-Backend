@@ -162,6 +162,7 @@ router.post('/',
     body('description').trim().notEmpty().withMessage('Description is required'),
     body('claim_type').isIn(['Audit', 'Supervision', 'Audit / Supervision', 'Payment Request Form', 'Meeting', 'Misscellaneous', 'Approved Supplier IT (Yearly)', 'Approved Supplier Admin (Yearly)', 'Approved Supplier IT (Monthly)', 'Approved Supplier Admin (Monthly)', 'Approved Supplier Training (Yearly)', 'Approved Supplier Training (Monthly)', 'Approved Supplier Advertisement (Yearly)', 'Approved Supplier Admin (Monthly)']),
     body('amount').isFloat({ min: 0 }).withMessage('Valid amount is required'),
+    body('reason').notEmpty().withMessage('Rejection reason is required').trim(),
     body('notes').optional().trim(),
     body('image').optional()
   ],
@@ -170,6 +171,8 @@ router.post('/',
     // Check validation errors
 
     // Add receipt if uploaded
+
+    console.log(req.body)
     
 
     
@@ -201,7 +204,10 @@ router.post('/',
       claim_type: req.body.claim_type,
       amount: req.body.amount,
       currency: req.body.currency || '$',
-      notes: req.body.notes
+      notes: req.body.notes,
+      reason: req.body.reason,
+      contact_person: req.body.contact_person,
+      contact_email: req.body.contact_email
     };
     
     

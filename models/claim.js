@@ -41,13 +41,31 @@ const claimSchema = new mongoose.Schema({
   },
   currency: {
     type: String,
-    default: '$'
+    default: '£'
   },
   receipt_url: {
     type: String,
     trim: true
   },
   receipt_filename: {
+    type: String
+  },
+  reason: {
+    type: String
+  },
+  expense_type: {
+    type: String
+  },
+  bank_transfer_amount: {
+    type: Number
+  },
+  vat_amount: {
+    type: Number
+  },
+  cash_amount: {
+    type: Number
+  },
+  other_info: {
     type: String
   },
   status: {

@@ -270,10 +270,10 @@ router.put('/:id',
   }
 });
 
-// @route   DELETE /api/users/:id/deactivate
-// @desc    Delete user (soft delete by changing status)
+// @route   put /api/users/:id/deactivate
+// @desc    update user (soft delete by changing status)
 // @access  Private (Admin only)
-router.delete('/:id/deactivate', auth.verifyToken, auth.checkRole('admin'), async (req, res) => {
+router.put('/:id/deactivate', auth.verifyToken, auth.checkRole('admin'), async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
     
@@ -316,10 +316,10 @@ router.delete('/:id/deactivate', auth.verifyToken, auth.checkRole('admin'), asyn
 });
 
 
-// @route   DELETE /api/users/:id/activate
+// @route   update /api/users/:id/activate
 // @desc    Activate user (Activate by changing status)
 // @access  Private (Admin only)
-router.delete('/:id/activate', auth.verifyToken, auth.checkRole('admin'), async (req, res) => {
+router.put('/:id/activate', auth.verifyToken, auth.checkRole('admin'), async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
     
